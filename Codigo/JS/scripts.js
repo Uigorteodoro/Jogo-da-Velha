@@ -1,5 +1,6 @@
 const celulas = document.querySelectorAll(".celula");
-let checarTurno = true;
+// let checarTurno = true;
+let fimDeJogo = false;
 
 const JOGADOR_X = "X";
 const JOGADOR_O = "O";
@@ -12,18 +13,35 @@ const COMBINACOES = [
     [1,4,7],
     [2,5,8],
     [0,4,8],
-    [2,4,6]
+    [2,4,6] 
 ];
 
 document.addEventListener("click", (event) => {
     if (event.target.matches(".celula")){
-        jogar(event.target.id);
+        jogar(event.target.id, JOGADOR_X);
+        setTimeout(() => bot(), 500);
     }
 });
 
-function jogar(id){
+function bot(){
+    const posicoesDisponiveis = [];
+    for (index in celulas){
+         if (!isNaN(index)){
+            if (!celulas[index].classList.contains("X") && !celulas[index].classList.contains("O")){
+                posicoesDisponiveis.push(index); 
+            }
+         }
+    }
+    const posicaoAleatoria = Math.floor(Math.random() * posicoesDisponiveis.length);
+
+    if (!fimDeJogo){
+        jogar(posicoesDisponiveis[posicaoAleatoria], JOGADOR_O);
+    }
+}
+
+
+function jogar(id, turno){
     const celula = document.getElementById(id);
-    turno = checarTurno ? JOGADOR_X : JOGADOR_O;
     celula.textContent = turno;
     celula.classList.add(turno);
     checarVencedor(turno);
@@ -32,7 +50,7 @@ function jogar(id){
 function checarVencedor(turno){
     const vencedor = COMBINACOES.some((comb) => {
         return comb.every((index) => {
-            return celulas(index).classList.contains(turno);
+            return celulas[index].classList.contains(turno);
         });
     });
 
@@ -40,8 +58,6 @@ function checarVencedor(turno){
         encerraJogo(turno);
     } else if(checarEmpate()){
         encerraJogo();
-    } else{
-        checarTurno = !checarTurno;
     }
 }
 
@@ -51,11 +67,11 @@ function checarEmpate() {
 
     for (index in celulas) {
         if (!isNaN(index)){
-            if(celulas(index).classList.contains(JOGADOR_X)) {
+            if(celulas[index].classList.contains(JOGADOR_X)) {
                 x++;
             }
     
-            if(celulas(index).classList.contains(JOGADOR_O)) {
+            if(celulas[index].classList.contains(JOGADOR_O)) {
                 o++;
             }
         }
@@ -65,7 +81,7 @@ function checarEmpate() {
 }
 
 function encerraJogo(vencedor = null) {
-
+    fimDeJogo = true;
     const telaReinico = document.getElementById("tela-reinicio");
     const h2 = document.createElement("h2");
     const h3 = document.createElement("h3");
@@ -77,14 +93,14 @@ function encerraJogo(vencedor = null) {
     telaReinico.appendChild(h3);
 
     if (vencedor) {
-        h2.innerHTML = 'O player <span>${vencedor}</span> venceu';
+        h2.innerHTML = `O player <span>${vencedor} </span> venceu`;
     } else{
         h2.innerHTML = "Empatou";
     }
 
     let contador = 3;
     setInterval(() => {
-        h3.innerHTML = 'Reiniciando em ${contador--}';
+        h3.innerHTML = `Reiniciando em ${contador--}`;
     }, 1000);
 
     setTimeout(() => location.reload(), 4000);
